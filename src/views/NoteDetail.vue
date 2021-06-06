@@ -8,29 +8,30 @@
   >
     <div class="container px-8 pb-24 mx-auto lg:px-4">
       <div class="flex flex-col w-full p-8 mx-auto mt-10 border rounded-lg">
-        <!--     <h1 class="text-2xl font-bold">
-          <span class="text-gray-400 uppercase text-sm block">{{ note.molecule }}</span>
-          {{ note.title }}
-        </h1> -->
+        <p class="uppercase text-gray-500 text-xs">
+          {{ note.molecule }} - {{ note.id }}
+        </p>
         <input
           id="title"
           v-model="note.title"
           type="text"
           name="title"
           placeholder="Title"
-          class="w-full px-4 py-2 mb-4 mr-4 text-base text-blue-700 bg-gray-100 border-transparent rounded-lg focus:border-gray-500 focus:bg-white focus:ring-0"
+          class="w-full px-4 py-2 mt-4 mb-4 mr-4 text-base text-blue-700 bg-gray-100 border-transparent rounded-lg focus:border-gray-500 focus:bg-white focus:ring-0"
         >
         <EditorWrapper
           :note="note"
+          :notes="notes"
           :content.sync="content"
           class="mt-8"
+          @on-link-item="linkNewItem"
         />
         <h2 class="mt-4 font-bold text-lg">
           Linked Notes
         </h2>
         <ul>
           <li
-            v-for="linked in note.linkedResolved"
+            v-for="linked in resolveLinked"
             :key="linked.id"
           >
             <router-link :to="`/note/${linked.id}`">
@@ -39,7 +40,7 @@
           </li>
         </ul>
         <multiselect
-          v-model="note.linkedResolved"
+          v-model="resolveLinked"
           :options="notes"
           :multiple="true"
           label="title"
@@ -74,10 +75,7 @@ export default {
             title
             content
             molecule
-            linkedResolved {
-              id
-              title
-            }
+            linked
           }
         }
       `,
@@ -85,6 +83,9 @@ export default {
         return {
           id: this.$route.params.id
         }
+      },
+      result(ApolloQueryResult, key) {
+        this.setLocalNote(ApolloQueryResult.data)
       }
     },
     notes: {
@@ -98,9 +99,25 @@ export default {
       `
     }
   },
+  data() {
+    return {
+      editing: false,
+      noteUpdated: {
+        title: '',
+        content: '',
+        molecule: '',
+        linked: []
+      }
+    }
+  },
   computed: {
-    linkedNotes () {
-      return this.note.linkedResolved.map(el => el.id)
+    resolveLinked: {
+      get () {
+        return this.notes.filter(el => this.noteUpdated.linked.includes(el.id))
+      },
+      set (ids) {
+        this.noteUpdated.linked = ids.map(el => el.id)
+      }
     },
     id () {
       return this.$route.params.id
@@ -110,27 +127,19 @@ export default {
         return this.note.content
       },
       set (value) {
-        this.$apollo.mutate({
-          // Query
-          mutation: gql`mutation UpdateNote($UpdateNoteInput: UpdateNoteInput!) {
-          updateNote(input: $UpdateNoteInput) {
-            id
-          }
-        }`,
-          // Parameters
-          variables: {
-            UpdateNoteInput: {
-              title: this.note.title,
-              id: this.note.id,
-              molecule: this.note.molecule,
-              content: value
-            }
-          }
-        })
+        this.noteUpdated.content = value
       }
     }
   },
   methods: {
+    setLocalNote() {
+      console.log('n', this.note );
+      this.noteUpdated.content = this.note.content
+      this.noteUpdated.linked = this.note.linked
+    },
+    linkNewItem(item) {
+      this.noteUpdated.linked.push(item.id)
+    },
     update () {
       this.$apollo.mutate({
         // Query
@@ -145,7 +154,8 @@ export default {
             title: this.note.title,
             id: this.note.id,
             molecule: this.note.molecule,
-            linked: this.linkedNotes
+            linked: this.noteUpdated.linked,
+            content: this.noteUpdated.content
           }
         }
       })

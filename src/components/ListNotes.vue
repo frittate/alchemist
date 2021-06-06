@@ -1,21 +1,30 @@
 <template>
-  <div class="text-left">
-    <ul
-      v-for="molecule in molecules"
-      :key="molecule.type"
+  <div>
+    <div v-if="$apollo.loading">
+      Loading
+    </div>
+    <div
+      v-else
+      class="text-left"
     >
-      <h4 class="font-bold mb-2">
-        {{ molecule.type }}
-      </h4>
-      <li
-        v-for="note in filterBy(molecule.type)"
-        :key="note.id"
+      <ul
+        v-for="molecule in molecules"
+        :key="molecule.type"
+        class="mb-10"
       >
-        <router-link :to="`/note/${note.id}`">
-          {{ note.title }}
-        </router-link>
-      </li>
-    </ul>
+        <h4 class="font-bold mb-2">
+          {{ molecule.type }}
+        </h4>
+        <li
+          v-for="note in filterBy(molecule.type)"
+          :key="note.id"
+        >
+          <router-link :to="`/note/${note.id}`">
+            {{ note.title }}
+          </router-link>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 <script>
@@ -47,7 +56,9 @@ export default {
       return JSON.parse(content)
     },
     filterBy (filter) {
-      return this.notes.filter(note => note.molecule === filter)
+      if (!this.$apollo.loading) {
+        return this.notes.filter(note => note.molecule === filter)
+      }
     }
   }
 }

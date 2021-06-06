@@ -7,7 +7,11 @@
       class="border border-s border-blue-400 overflow-y-auto h-120 text-black"
     />
 
-    <!--    <div v-show="showSuggestions" ref="suggestions" class="suggestion-list">
+    <div
+      v-show="showSuggestions"
+      ref="suggestions"
+      class="suggestion-list"
+    >
       <template v-if="hasResults">
         <div
           v-for="(linkedFile, index) in filteredFiles"
@@ -20,10 +24,13 @@
           <span class="text-xs">({{ linkedFile.molecule }})</span>
         </div>
       </template>
-      <div v-else class="suggestion-list__item is-empty">
+      <div
+        v-else
+        class="suggestion-list__item is-empty"
+      >
         No linkedFiles found
       </div>
-    </div> -->
+    </div>
   </div>
 </template>
 
@@ -46,6 +53,10 @@ export default {
     note: {
       type: Object,
       default: () => {}
+    },
+    notes: {
+      type: Array,
+      default: () => []
     },
     content: {
       type: [Array, String],
@@ -71,11 +82,11 @@ export default {
       return this.query || this.hasResults
     },
     suggestedItems () {
-      return this.$store.state.files.map(el => {
+      return this.notes.map(note => {
         return {
-          molecule: el.molecule,
-          id: el.id,
-          name: el.title
+          molecule: note.molecule,
+          id: note.id,
+          name: note.title
         }
       })
     }
@@ -164,10 +175,6 @@ export default {
       this.editor.setContent('', true)
     }
   },
-  beforeDestroy () {
-    // this.saveContent()
-    this.editor.destroy()
-  },
   methods: {
     clearContent () {
       this.editor.clearContent(true)
@@ -200,13 +207,14 @@ export default {
           label: linkedFile.name
         }
       })
+      this.$emit('on-link-item', linkedFile)
       this.editor.focus()
     },
     renderPopup (node) {
       if (this.popup) {
         return
       }
-      this.popup = tippy('#__nuxt', {
+      this.popup = tippy('body', {
         getReferenceClientRect: node.getBoundingClientRect,
         appendTo: () => document.body,
         interactive: true,
@@ -222,7 +230,7 @@ export default {
     },
     destroyPopup () {
       if (this.popup) {
-        this.popup[0].destroy()
+        // this.popup[0].destroy()
         this.popup = null
       }
     }

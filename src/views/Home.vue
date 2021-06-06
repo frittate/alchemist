@@ -1,7 +1,7 @@
 <template>
-  <div class="home">
-    <ListNotes msg="Welcome to Your Vue.js App" />
-  </div>
+  <main class="home p-4">
+    <ListNotes />
+  </main>
 </template>
 
 <script>
