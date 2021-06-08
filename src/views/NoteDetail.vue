@@ -133,7 +133,6 @@ export default {
   },
   methods: {
     setLocalNote() {
-      console.log('n', this.note );
       this.noteUpdated.content = this.note.content
       this.noteUpdated.linked = this.note.linked
     },

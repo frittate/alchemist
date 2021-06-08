@@ -1,6 +1,6 @@
 import ApolloClient from 'apollo-boost'
 
-const graphqlUrl = "https://alchemist-server.azurewebsites.net/graphql"
+const graphqlUrl = "https://alchemist-notes-server.herokuapp.com/graphql";
 
 console.log(process.env.NODE_ENV);
 
