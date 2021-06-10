@@ -44,7 +44,7 @@
             class="px-8 py-2 font-semibold text-white transition duration-500 ease-in-out transform rounded-lg shadow-xl bg-gradient-to-r from-blue-700 hover:from-blue-600 to-blue-600 hover:to-blue-700 focus:ring focus:outline-none"
             @click="save"
           >
-            Save
+            {{ loading ? 'saving...' : 'save' }}
           </button>
         </div>
       </div>
@@ -69,6 +69,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       note: {
         title: "",
         content: [],
@@ -86,9 +87,9 @@ export default {
     }
   },
   methods: {
-    update() {
+    async update() {
       if (this.note.title && this.note.molecule.type) {
-        this.$apollo.mutate({
+        const res = await this.$apollo.mutate({
           // Query
           mutation: gql`
             mutation CreateNote($CreateNoteInput: CreateNoteInput!) {
@@ -105,13 +106,16 @@ export default {
               content: this.note.content,
               shortId: this.shortId
             }
-          }
+          },
         });
+
+       return res
       }
     },
-    save () {
-      this.update()
-      console.log(this.shortId)
+    async save () {
+      this.loading = true
+      const newObject = await this.update()
+      this.$router.push(`/note/${newObject.data.createNote.id}`)
     }
   }
 }
