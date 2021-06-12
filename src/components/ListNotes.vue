@@ -15,7 +15,7 @@
           {{ molecule.type }}
         </h4>
         <ul
-          class="mb-10 flex flex-wrap space-x-2 space-y-2"
+          class="mb-10 flex flex-wrap space-x-2"
         >
           <li
             v-for="note in filterBy(molecule.type)"

@@ -140,27 +140,20 @@ export default {
     async deleteNote() {
       this.loading = true
 
-      if (window.confirm()) {
+      if (window.confirm('Do you want to delete this note?')) {
         await this.$apollo.mutate({
           mutation: DeleteNote,
           variables: {
             Id: this.note.id
           },
-          update: (cache, { data }) => {
-            const id = data.deleteNote.id
-            console.log(cache, data);
+          update: (cache, { data: { deleteNote } }) => {
+            const id = deleteNote.id
 
             if (id) {
-              const store = cache.readQuery({ query: NotesQuery })
-              store.notes = store.notes.filter(note => note.id !== id)
-              cache.writeQuery({ query: NotesQuery, store})
+              const data = cache.readQuery({ query: NotesQuery })
+              data.notes = data.notes.filter(note => note.id !== id)
+              cache.writeQuery({ query: NotesQuery, data })
             }
-
-          /*   const data = cache.readQuery({ query: NotesQuery })
-           
-            data.notes.push(notes)
-     
-            cache.writeQuery({ query: NotesQuery, data }) */
           },
         })
 
@@ -184,7 +177,18 @@ export default {
             linked: this.noteUpdated.linked,
             content: this.noteUpdated.content
           }
-        }
+        },
+        update: (cache, { data: { updateNote } }) => {
+          const { id, title, shortId } = updateNote
+          const data = cache.readQuery({ query: NotesQuery })
+          const updatedItem = data.notes.find(note => note.id === id)
+          updatedItem.title = title
+          updatedItem.shortId = shortId
+          cache.writeQuery({
+            query: NotesQuery,
+            data
+          })
+        },
       })
 
       this.loading = false

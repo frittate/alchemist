@@ -7,6 +7,7 @@ import router from './router'
 import './assets/styles/index.css'
 import '@mdi/font/css/materialdesignicons.css'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
+import 'tippy.js/dist/tippy.css';
 import Multiselect from 'vue-multiselect'
 
 Vue.config.productionTip = false

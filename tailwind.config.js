@@ -4,7 +4,7 @@ module.exports = {
 
     // These options are passed through directly to PurgeCSS
     options: {
-      safelist: [/^tippy-/],
+      safelist: [/tippy/],
       keyframes: true,
       fontFace: true,
     },

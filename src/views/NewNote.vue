@@ -56,6 +56,7 @@ import EditorWrapper from "@/components/editor/EditorWrapper";
 import { moleculeSchemas } from "@/utils/schemas/molecules";
 import shortId from "@/utils/shortId";
 import { CreateNote } from '@/utils/mutations/NoteMutations'
+import { NotesQuery } from '@/utils/queries/NotesQueries';
 
 export default {
   components: {
@@ -94,6 +95,23 @@ export default {
               content: this.note.content,
               shortId: this.shortId
             }
+          },
+          update: (cache, { data: { createNote } }) => {
+            const { id, title, molecule } = createNote
+            const data = cache.readQuery({ query: NotesQuery })
+            const newItem = {
+              __typename: 'Note',
+              title,
+              id,
+              molecule
+            }
+
+            data.notes.push(newItem)
+
+            cache.writeQuery({
+              query: NotesQuery,
+              data
+            })
           },
         });
 
