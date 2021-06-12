@@ -1,9 +1,9 @@
 import ApolloClient from 'apollo-boost'
 
-// const graphqlUrl = "https://alchemist-notes-server.herokuapp.com/graphql";
-const graphqlUrl = 'http://localhost:3000/graphql'
-
-console.log(process.env.NODE_ENV);
+const graphqlUrl =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000/graphql"
+    : "https://alchemist-notes-server.herokuapp.com/graphql";
 
 export const apolloClient = new ApolloClient({
   // You should use an absolute URL here
