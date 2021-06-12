@@ -6,7 +6,6 @@
           class="flex flex-col w-full p-8 mx-auto mt-10 border rounded-lg md:ml-auto md:mt-0"
         >
           <div class="relative ">
-            <h4>{{ shortId }}</h4>
             <input
               id="title"
               v-model="note.title"
@@ -49,19 +48,14 @@
         </div>
       </div>
     </section>
-    <!--  <h1>New Note</h1>
-    <input type="text" v-model="note.title">
-    <EditorWrapper :note="note" :content.sync="note.content"/>
-    <multiselect v-model="note.molecule" :options="molecules" label="title" trackBy="type"></multiselect>
-    <button @click="update">Save</button> -->
   </div>
 </template>
 
 <script>
-import gql from "graphql-tag";
 import EditorWrapper from "@/components/editor/EditorWrapper";
 import { moleculeSchemas } from "@/utils/schemas/molecules";
 import shortId from "@/utils/shortId";
+import { CreateNote } from '@/utils/mutations/NoteMutations'
 
 export default {
   components: {
@@ -91,13 +85,7 @@ export default {
       if (this.note.title && this.note.molecule.type) {
         const res = await this.$apollo.mutate({
           // Query
-          mutation: gql`
-            mutation CreateNote($CreateNoteInput: CreateNoteInput!) {
-              createNote(input: $CreateNoteInput) {
-                id
-              }
-            }
-          `,
+          mutation: CreateNote,
           // Parameters
           variables: {
             CreateNoteInput: {

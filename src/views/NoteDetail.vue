@@ -8,9 +8,17 @@
   >
     <div class="container px-8 pb-24 mx-auto lg:px-4">
       <div class="flex flex-col w-full p-8 mx-auto mt-10 border rounded-lg">
-        <p class="uppercase text-gray-500 text-xs">
-          {{ note.molecule }} - {{ note.id }}
-        </p>
+        <div class="flex justify-between">
+          <p class="uppercase text-gray-500 text-xs">
+            {{ note.molecule }} | {{ note.id }} | {{ note.shortId || '' }}
+          </p>
+          <button
+            class="uppercase font-bold text-red-500 text-xs "
+            @click="deleteNote"
+          >
+            Delete
+          </button>
+        </div>
         <input
           id="title"
           v-model="note.title"
@@ -48,9 +56,9 @@
         />
         <button
           class="mt-8 px-8 py-2 font-semibold text-white transition duration-500 ease-in-out transform rounded-lg shadow-xl bg-gradient-to-r from-blue-700 hover:from-blue-600 to-blue-600 hover:to-blue-700 focus:ring focus:outline-none"
-          @click="update"
+          @click="updateNote"
         >
-          Save
+          {{ loading ? 'saving...' : 'save' }}
         </button>
       </div>
     </div>
@@ -58,8 +66,11 @@
 </template>
 
 <script>
-import gql from 'graphql-tag'
 import EditorWrapper from '../components/editor/EditorWrapper'
+import shortId from "@/utils/shortId";
+import { NoteQuery } from '@/utils/queries/NoteQueries'
+import { NotesQuery } from '@/utils/queries/NotesQueries';
+import { DeleteNote, UpdateNote } from '@/utils/mutations/NoteMutations';
 
 export default {
   name: 'NoteDetail',
@@ -68,17 +79,7 @@ export default {
   },
   apollo: {
     note: {
-      query: gql`
-        query Note($id: ID!) {
-          note(id: $id) {
-            id
-            title
-            content
-            molecule
-            linked
-          }
-        }
-      `,
+      query: NoteQuery,
       variables () {
         return {
           id: this.$route.params.id
@@ -89,19 +90,13 @@ export default {
       }
     },
     notes: {
-      query: gql`
-        query {
-          notes {
-            id
-            title
-          }
-        }
-      `
+      query: NotesQuery
     }
   },
   data() {
     return {
       editing: false,
+      loading: false,
       noteUpdated: {
         title: '',
         content: '',
@@ -122,6 +117,9 @@ export default {
     id () {
       return this.$route.params.id
     },
+    shortId() {
+      return shortId();
+    },
     content: {
       get () {
         return this.note.content
@@ -139,25 +137,57 @@ export default {
     linkNewItem(item) {
       this.noteUpdated.linked.push(item.id)
     },
-    update () {
-      this.$apollo.mutate({
+    async deleteNote() {
+      this.loading = true
+
+      if (window.confirm()) {
+        await this.$apollo.mutate({
+          mutation: DeleteNote,
+          variables: {
+            Id: this.note.id
+          },
+          update: (cache, { data }) => {
+            const id = data.deleteNote.id
+            console.log(cache, data);
+
+            if (id) {
+              const store = cache.readQuery({ query: NotesQuery })
+              store.notes = store.notes.filter(note => note.id !== id)
+              cache.writeQuery({ query: NotesQuery, store})
+            }
+
+          /*   const data = cache.readQuery({ query: NotesQuery })
+           
+            data.notes.push(notes)
+     
+            cache.writeQuery({ query: NotesQuery, data }) */
+          },
+        })
+
+        this.$router.push('/')
+      }
+    },
+    async updateNote() {
+      this.loading = true
+      const newShortId = this.note.shortId || shortId()
+
+      await this.$apollo.mutate({
         // Query
-        mutation: gql`mutation UpdateNote($UpdateNoteInput: UpdateNoteInput!) {
-          updateNote(input: $UpdateNoteInput) {
-            id
-          }
-        }`,
+        mutation: UpdateNote,
         // Parameters
         variables: {
           UpdateNoteInput: {
             title: this.note.title,
             id: this.note.id,
+            shortId: newShortId,
             molecule: this.note.molecule,
             linked: this.noteUpdated.linked,
             content: this.noteUpdated.content
           }
         }
       })
+
+      this.loading = false
     }
   }
 }

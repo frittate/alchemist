@@ -146,6 +146,12 @@ export default {
         }),
         ...defaultExtensions()
       ],
+      editorProps: {
+        attributes: {
+          class:
+            "prose prose-sm sm:prose md:prose-md m-5 focus:outline-none"
+        }
+      },
       content: null,
       onUpdate: () => {
         const changes = {

@@ -19,6 +19,7 @@ import band from './band'
 import lifePeriod from './lifePeriod'
 import conversation from './conversation'
 import movie from './movie'
+import company from "./company"
 
 export const molecules = [
   'game',
@@ -32,7 +33,7 @@ export const molecules = [
   'mail',
   'message',
   'video',
-  'exe'
+  'exe',
 ]
 
 export const moleculeSchemas = [
@@ -56,5 +57,6 @@ export const moleculeSchemas = [
   band,
   lifePeriod,
   conversation,
-  movie
+  movie,
+  company
 ]
